@@ -1,0 +1,82 @@
+.hero-content-reveal-section.hover-left-reveal {
+
+    .hero_overlay_item-right-1,
+    .hero_overlay_item-right-2 {
+        opacity: 1;
+        transform: translateX(0%) rotateZ(0deg);
+    }
+
+    .hero_overlay_item-out-right {
+        opacity: 0;
+        transform: translateX(50%) rotateZ(10deg);
+    }
+
+    .hero-reveal-extra-icon.left {
+        opacity: 1;
+        scale: 1;
+    }
+
+    .hero-content-reveal-btn-right {
+        opacity: .2;
+    }
+}
+
+.hero-content-reveal-section.hover-right-reveal {
+
+    .hero_overlay_item-left-1,
+    .hero_overlay_item-left-2 {
+        opacity: 1;
+        transform: translateX(0%) rotateZ(0deg);
+    }
+    .hero_overlay_item-left-2 {
+        transform: translateX(0%) rotateZ(-10deg);
+    }
+
+    .hero_overlay_item-out-left {
+        opacity: 0;
+        transform: translateX(-50%) rotateZ(-10deg);
+    }
+
+    .hero-reveal-extra-icon.right {
+        opacity: 1;
+        scale: 1;
+    }
+
+    .hero-content-reveal-btn-left {
+        opacity: .2;
+    }
+}
+
+/* Hero title reel (js/reveals.js > initTitleReel) */
+.title-reel_window {
+    display: inline-block;
+    vertical-align: top;
+    height: 1.4em;
+    margin: -.13em 0;
+    overflow: hidden;
+    text-align: left;
+    -webkit-mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent);
+}
+
+.title-reel_strip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    will-change: transform;
+}
+
+.title-reel_word {
+    display: block;
+    height: 1.4em;
+    line-height: 1.4em;
+    white-space: nowrap;
+}
+
+.title-reel_word:nth-child(2) {
+    color: #60d2bb;
+}
+
+.title-reel_word:nth-child(3) {
+    color: #A7ADDD;
+}
