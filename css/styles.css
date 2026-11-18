@@ -32,14 +32,56 @@
 
 body:has(.mouse-follower-card:hover) .mouse-follower {
     opacity: 1;
-}*   COMPONENTS
+}
+
+/*
+*   BUTTONS
+*/
+.button.is-link:hover,
+.simple-card-container-2:hover,
+.cta-card-container:hover {
+    .button-link-icon {
+        transform: translateX(0.25em);
+    }
+}
+
+/*
+*   COMPONENTS
 */
 
-/* Basic Quote Heading
-   Two ring clusters (.quote-orbit.is-left / .is-right), each with an outer ring (clockwise, 60s) and an
-   inner ring (counter-clockwise, 45s). Each cluster is a clipped window; only the inner half of the circles
-   shows, peeking in from the section edge. The left cluster is the right one rotated 180deg.
-   Pure CSS: rings turn continuously, no JS. */
+/* Simple Card Container 2 */
+[data-wf--basic-card-2--variant="for-employers"]:hover {
+    .button.is-link {
+        color: var(--_colors---nutrium-sector-colors--for-employers-main);
+    }
+}
+[data-wf--basic-card-2--variant="for-health-plans"]:hover {
+    .button.is-link {
+        color: var(--_colors---nutrium-sector-colors--for-health-plans-main);
+    }
+}
+[data-wf--basic-card-2--variant="for-health-plans"]:hover {
+    .button.is-link {
+        color: var(--_colors---nutrium-sector-colors--for-health-plans-main);
+    }
+}
+[data-wf--basic-card-2--variant="for-benefit-consultants"]:hover {
+    .button.is-link {
+        color: var(--_colors---nutrium-sector-colors--for-benefit-consultants-main);
+    }
+}
+[data-wf--basic-card-2--variant="for-individuals"]:hover {
+    .button.is-link {
+        color: var(--_colors---nutrium-sector-colors--for-individuals-main);
+    }
+}
+[data-wf--basic-card-2--variant="for-dietitians"]:hover {
+    .button.is-link {
+        color: var(--_colors---nutrium-sector-colors--for-dietitians-main);
+    }
+}
+
+/* Basic Quote Heading */
 .quote-orbit {
     aspect-ratio: 277 / 515.047;
     overflow: hidden;
