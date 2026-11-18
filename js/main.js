@@ -131,6 +131,157 @@ export function mainInit() {
         if (rowBottom) initLogoRow(rowBottom, -1);
     });
 
+
+
+    // Card flip-through
+    // Stack of .card-flip-item inside .card-flip-container.
+    const FLIP_DEFAULT_STEP_REM = 4.5; // vertical offset between stacked cards (matches Webflow's .two top)
+    const FLIP_HOVER_LIFT_REM = 0.5;   // back cards lift slightly on hover
+    const FLIP_TILT = 10;              // degrees, alternating sign per card
+    const FLIP_SEGMENT_VH = 0.6;       // scroll length (in viewport heights) for each card to arrive
+    const FLIP_HOLD_VH = 0.3;          // extra pinned scroll after the last card, to interact with the stack
+
+    function initCardFlip(container) {
+        const items = Array.from(container.querySelectorAll(':scope > .card-flip-item'));
+        const total = items.length;
+        if (total < 2) return;
+
+        const remPx = () => parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const stepRem = parseFloat(container.dataset.flipStep) || FLIP_DEFAULT_STEP_REM;
+        const stepPx = () => stepRem * remPx();
+
+        // order[slot] = index of the item sitting in that slot (0 = back ... total-1 = front)
+        const defaultOrder = () => items.map((_, i) => i);
+        let order = defaultOrder();
+        let interactive = false; // only after the stack is complete
+
+        const slotOf = index => order.indexOf(index);
+        const slotY = index => slotOf(index) * stepPx();
+
+        // Single managed tween per item for y (click/hover), so it never fights the scroll timeline
+        const moveTo = (item, y, duration, ease) => {
+            item._flipTween?.kill();
+            item._flipTween = gsap.to(item, { y, duration: reduceMotion ? 0 : duration, ease, overwrite: false });
+        };
+
+        // Normalise positioning so any number of items stacks the same way (overrides the per-item
+        // combo classes: first item sets the container height, the rest overlay it).
+        const layout = () => {
+            items.forEach((item, i) => {
+                if (i === 0) gsap.set(item, { position: 'relative', top: 0 });
+                else gsap.set(item, { position: 'absolute', top: 0, left: 0, width: '100%' });
+            });
+            gsap.set(container, { paddingBottom: (total - 1) * stepPx(), position: 'relative' });
+        };
+
+        // Apply z-index / cursor / a11y for the current order; optionally set y (not while scroll controls it)
+        const place = (mode) => { // mode: 'none' | 'set' | 'animate'
+            items.forEach((item, i) => {
+                const isFront = slotOf(i) === total - 1;
+                gsap.set(item, { zIndex: slotOf(i) + 1, cursor: interactive && !isFront ? 'pointer' : 'default' });
+                item.classList.toggle('is-front', isFront);
+                item.setAttribute('tabindex', interactive && !isFront ? '0' : '-1');
+                item.setAttribute('role', interactive && !isFront ? 'button' : 'group');
+                if (mode === 'animate') moveTo(item, slotY(i), 0.5, 'power3.out');
+                else if (mode === 'set') { item._flipTween?.kill(); gsap.set(item, { y: slotY(i) }); }
+            });
+        };
+
+        const bringToFront = index => {
+            if (!interactive || slotOf(index) === total - 1) return;
+            order = order.filter(i => i !== index).concat(index);
+            place('animate');
+        };
+
+        items.forEach((item, i) => {
+            item.addEventListener('click', () => bringToFront(i));
+            item.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    bringToFront(i);
+                }
+            });
+            // Back cards lift a little on hover
+            item.addEventListener('mouseenter', () => {
+                if (!interactive || slotOf(i) === total - 1) return;
+                moveTo(item, slotY(i) - FLIP_HOVER_LIFT_REM * remPx(), 0.3, 'power2.out');
+            });
+            item.addEventListener('mouseleave', () => {
+                if (!interactive) return;
+                moveTo(item, slotY(i), 0.3, 'power2.out');
+            });
+        });
+
+        layout();
+
+        // ----- Scroll reveal -----
+        const section = container.closest('section');
+        const canScroll = !reduceMotion
+            && container.dataset.flipScroll !== 'false'
+            && section
+            && typeof ScrollTrigger !== 'undefined';
+
+        if (!canScroll) {
+            interactive = true;
+            place('set');
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => { layout(); place('set'); }, 150);
+            });
+            return;
+        }
+
+        gsap.registerPlugin(ScrollTrigger);
+        place('none');
+
+        const setStacked = stacked => {
+            if (stacked === interactive) return;
+            interactive = stacked;
+            if (!stacked) {
+                // Un-stacking resets any chosen order, the timeline takes over y again
+                items.forEach(item => item._flipTween?.kill());
+                order = defaultOrder();
+            }
+            place('none');
+        };
+
+        const tl = gsap.timeline({
+            defaults: { ease: 'none' },
+            scrollTrigger: {
+                trigger: section,
+                start: () => (section.offsetHeight < window.innerHeight ? 'center center' : 'top top'),
+                end: () => '+=' + Math.round(window.innerHeight * (total * FLIP_SEGMENT_VH + FLIP_HOLD_VH)),
+                pin: true,
+                scrub: true,
+                anticipatePin: 1,
+                invalidateOnRefresh: true,
+                onRefresh: () => { order = defaultOrder(); place('none'); },
+            },
+            onUpdate: () => setStacked(tl.time() >= total)
+        });
+
+        items.forEach((item, i) => {
+            const dir = i % 2 ? FLIP_TILT : -FLIP_TILT;
+            tl.fromTo(item,
+                { y: () => window.innerHeight + i * stepPx(), rotation: dir },
+                { y: () => i * stepPx(), rotation: 0, duration: 1 },
+                i // cards arrive one after the other
+            );
+        });
+        // Hold at the end so the stack can be played with while pinned
+        tl.to({}, { duration: (FLIP_HOLD_VH / FLIP_SEGMENT_VH) }, total);
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => { layout(); ScrollTrigger.refresh(); }, 150);
+        });
+    }
+
+    document.querySelectorAll('.card-flip-container').forEach(initCardFlip);
+
     console.log("Loading mainInit()");
 
 }
