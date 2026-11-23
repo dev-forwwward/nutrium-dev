@@ -282,6 +282,103 @@ export function mainInit() {
 
     document.querySelectorAll('.card-flip-container').forEach(initCardFlip);
 
+    // LOOP PARENTS (shared by TEXT LOOP ROTATION and IMAGE FADE SLIDE)
+    // Mark a section with [data-loop-parent]; each feature below looks for its own attribute INSIDE that
+    // parent, so the pattern can be repeated as many times as needed on a page, with any number of words/images.
+    // One clock per parent keeps the word and the picture changing together. Only runs up to 767px.
+    // Optional on the parent: data-loop-interval="3400" (ms between changes).
+    const LOOP_DEFAULT_INTERVAL = 3400; // ms
+    const loopParents = document.querySelectorAll('[data-loop-parent]');
+    const loopMobile = window.matchMedia('(max-width: 767px)'); // keep in sync with the @media in css/styles.css
+    const loopReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const loopClocks = new WeakMap();
+
+    function getLoopClock(parent) {
+        if (loopClocks.has(parent)) return loopClocks.get(parent);
+
+        const interval = parseInt(parent.dataset.loopInterval, 10) || LOOP_DEFAULT_INTERVAL;
+        const subscribers = []; // { next(), reset() }
+        let timer = null;
+        let inView = true;
+
+        const sync = () => {
+            const run = loopMobile.matches && !loopReduceMotion && inView && !document.hidden;
+            if (run && !timer) {
+                timer = setInterval(() => subscribers.forEach(s => s.next()), interval);
+            } else if (!run && timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            // Leaving mobile: back to the first word / image so nothing is left half-way
+            if (!loopMobile.matches) subscribers.forEach(s => s.reset());
+        };
+
+        loopMobile.addEventListener('change', sync);
+        document.addEventListener('visibilitychange', sync);
+        new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; sync(); }).observe(parent);
+
+        const clock = {
+            subscribe(subscriber) {
+                subscribers.push(subscriber);
+                sync();
+            }
+        };
+        loopClocks.set(parent, clock);
+        return clock;
+    }
+
+    // TEXT LOOP ROTATION
+    // [data-text-loop-rotation] wraps the words: every DIRECT child is one word (any number of words).
+    // CSS shows one word at a time; here we only move --loop-index, so the words roll vertically like a reel.
+    if (loopParents.length) {
+        loopParents.forEach(parent => {
+            const loop = parent.querySelector('[data-text-loop-rotation]');
+            if (!loop) return;
+            const words = Array.from(loop.children);
+            if (words.length < 2) return;
+
+            let index = 0;
+            const show = i => {
+                index = i;
+                loop.style.setProperty('--loop-index', index);
+                words.forEach((word, n) => word.setAttribute('aria-hidden', n === index ? 'false' : 'true'));
+            };
+
+            show(0);
+            getLoopClock(parent).subscribe({
+                next: () => show((index + 1) % words.length),
+                reset: () => show(0)
+            });
+        });
+    }
+
+    // IMAGE FADE SLIDE
+    // [data-image-fade-slide] wraps the images: every DIRECT child is one picture (any number of pictures).
+    // The picture in turn gets .is-active; CSS cross-fades it in while it rises a little.
+    if (loopParents.length) {
+        loopParents.forEach(parent => {
+            const slide = parent.querySelector('[data-image-fade-slide]');
+            if (!slide) return;
+            const images = Array.from(slide.children);
+            if (images.length < 2) return;
+
+            let index = 0;
+            const show = i => {
+                index = i;
+                images.forEach((image, n) => {
+                    image.classList.toggle('is-active', n === index);
+                    image.setAttribute('aria-hidden', n === index ? 'false' : 'true');
+                });
+            };
+
+            show(0);
+            getLoopClock(parent).subscribe({
+                next: () => show((index + 1) % images.length),
+                reset: () => show(0)
+            });
+        });
+    }
+
     console.log("Loading mainInit()");
 
 }

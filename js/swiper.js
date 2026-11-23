@@ -8,7 +8,7 @@ export function swiperInit() {
     if (swipersList.length > 0) {
 
         swipersList.forEach((swiper) => {
-
+console.log(swiper);
             const swiperPagination = swiper.closest('.swiper-pagination');
             const swiperNext = swiper.closest('.swiper-button-next');
             const swiperPrevious = swiper.closest('.swiper-button-prev');
@@ -18,12 +18,12 @@ export function swiperInit() {
                 slidesPerView: 1.25,
                 spaceBetween: 16,
                 direction: 'horizontal',
-                loop: true,
+                loop: false,
                 autoWidth: true,
-                speed: 1000,
+                // speed: 1000,
 
-                freeMode: true,
-                freeModeMomentum: false,
+                // freeMode: true,
+                // freeModeMomentum: false,
                 allowTouchMove: true,
                 breakpoints: {
                     // for screens 500px wide and up

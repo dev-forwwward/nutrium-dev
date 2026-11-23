@@ -129,3 +129,84 @@ body:has(.mouse-follower-card:hover) .mouse-follower {
         animation: none;
     }
 }
+
+/*
+*   LOOP (mobile only, same 767px as the matchMedia in js/main.js > LOOP PARENTS)
+*/
+/* Above 767px the loop wrappers do not render at all (nothing to set per breakpoint in the Designer) */
+@media (min-width: 768px) {
+
+    [data-text-loop-rotation],
+    [data-image-fade-slide] {
+        display: none;
+    }
+}
+
+@media (max-width: 767px) {
+
+    /* TEXT LOOP ROTATION: [data-text-loop-rotation] is a one-line window, its direct children are the words.
+       js/main.js only sets --loop-index; each word slides up by its own height (all words are 1.4em tall). */
+    [data-text-loop-rotation] {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 1.4em;
+        margin: -.13em 0;
+        overflow: hidden;
+        text-align: center;
+        -webkit-mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent);
+        mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent);
+    }
+
+    [data-text-loop-rotation]>* {
+        flex: none;
+        height: 1.4em;
+        line-height: 1.4em;
+        white-space: nowrap;
+        transform: translateY(calc(var(--loop-index, 0) * -100%));
+        transition: transform 1.1s cubic-bezier(.45, 0, .2, 1);
+    }
+
+    /* The H1's own last word (built by js/reveals.js > initTitleReel) gives way to the loop */
+    .hero-content-reveal-section:has([data-text-loop-rotation]) .title-reel_window {
+        display: none;
+    }
+
+    /* IMAGE FADE SLIDE: [data-image-fade-slide] stacks its direct children in one grid cell (so it is as tall
+       as the tallest picture, no fixed heights). The .is-active child fades in and rises; the others wait 40px below. */
+    [data-image-fade-slide] {
+        display: grid;
+        pointer-events: none;
+        -webkit-mask-image: linear-gradient(#000 38%, transparent 97%);
+        mask-image: linear-gradient(#000 38%, transparent 97%);
+    }
+
+    [data-image-fade-slide]>* {
+        grid-area: 1 / 1;
+        width: 100%;
+        opacity: 0;
+        transform: translateY(40px);
+        transition: opacity .6s ease, transform .8s cubic-bezier(.2, .7, .2, 1);
+    }
+
+    [data-image-fade-slide]>.is-active {
+        opacity: 1;
+        transform: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        [data-text-loop-rotation]>*,
+        [data-image-fade-slide]>* {
+            transition: none;
+        }
+    }
+}
+
+
+/**
+*   SWIPER
+**/
+.swiper {
+    overflow: visible !important;
+}
