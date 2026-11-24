@@ -7,11 +7,17 @@ export function swiperInit() {
 
     if (swipersList.length > 0) {
 
+        const swiperInstances = [];
+
         swipersList.forEach((swiper) => {
-console.log(swiper);
-            const swiperPagination = swiper.closest('.swiper-pagination');
-            const swiperNext = swiper.closest('.swiper-button-next');
-            const swiperPrevious = swiper.closest('.swiper-button-prev');
+            // Controls can sit inside .swiper or beside it in the same wrapper
+            const scope = swiper.parentElement;
+            const findControl = (selector) =>
+                swiper.querySelector(selector) || scope.querySelector(selector);
+
+            const swiperPagination = findControl('.swiper-pagination');
+            const swiperNext = findControl('.swiper-button-next');
+            const swiperPrevious = findControl('.swiper-button-prev');
 
 
             const swiperEl = new Swiper(swiper, {
@@ -43,11 +49,14 @@ console.log(swiper);
                     prevEl: swiperPrevious,
                 },
             });
+
+            swiperInstances.push(swiperEl);
         });
 
+        // update() lives on the Swiper instance, not the DOM element
         window.addEventListener('resize', () => {
-            swipersList.forEach((swiper) => {
-                swiper.update();
+            swiperInstances.forEach((instance) => {
+                instance.update();
             });
         });
 
