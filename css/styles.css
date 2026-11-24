@@ -49,32 +49,45 @@ body:has(.mouse-follower-card:hover) .mouse-follower {
 *   COMPONENTS
 */
 
+/* Simple Card Container */
+/* Is a Link */
+@media screen and (min-width: 768px) {
+    .simple-card-container .simple-card-link:hover {
+        box-shadow: 0 10px 18px #0000001f;
+    }
+}
+
 /* Simple Card Container 2 */
 [data-wf--basic-card-2--variant="for-employers"]:hover {
     .button.is-link {
         color: var(--_colors---nutrium-sector-colors--for-employers-main);
     }
 }
+
 [data-wf--basic-card-2--variant="for-health-plans"]:hover {
     .button.is-link {
         color: var(--_colors---nutrium-sector-colors--for-health-plans-main);
     }
 }
+
 [data-wf--basic-card-2--variant="for-health-plans"]:hover {
     .button.is-link {
         color: var(--_colors---nutrium-sector-colors--for-health-plans-main);
     }
 }
+
 [data-wf--basic-card-2--variant="for-benefit-consultants"]:hover {
     .button.is-link {
         color: var(--_colors---nutrium-sector-colors--for-benefit-consultants-main);
     }
 }
+
 [data-wf--basic-card-2--variant="for-individuals"]:hover {
     .button.is-link {
         color: var(--_colors---nutrium-sector-colors--for-individuals-main);
     }
 }
+
 [data-wf--basic-card-2--variant="for-dietitians"]:hover {
     .button.is-link {
         color: var(--_colors---nutrium-sector-colors--for-dietitians-main);
