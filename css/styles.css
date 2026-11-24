@@ -223,3 +223,47 @@ body:has(.mouse-follower-card:hover) .mouse-follower {
 .swiper {
     overflow: visible !important;
 }
+
+/* Slides always fill their parent's height: .swiper follows its container,
+   .swiper-wrapper follows .swiper, and slides stretch to the wrapper's cross size.
+   If the container has no fixed height, everything sizes to the tallest slide. */
+.swiper {
+    height: 100%;
+}
+
+.swiper .swiper-wrapper {
+    height: 100%;
+    align-items: stretch;
+}
+
+.swiper .swiper-slide {
+    height: auto;
+    align-self: stretch;
+    display: flex;
+}
+
+.swiper .swiper-slide > * {
+    flex: 1 1 auto;
+    height: auto; /* flex stretch fills the slide without needing a % chain */
+}
+
+.swiper .swiper-pagination {
+    bottom: -2.5rem !important;
+    display: flex;
+    justify-content: center;
+
+    .swiper-pagination-bullet {
+        margin: 0 .25rem;
+        width: .5rem !important;
+        height: .5rem !important;
+        background: #D5D9E2;
+        transition: all .25s ease;
+        opacity: 1;
+    }
+
+    .swiper-pagination-bullet.swiper-pagination-bullet-active {
+        background: #474F62;
+        width: 1.375rem !important;
+        border-radius: .25rem;
+    }
+}
