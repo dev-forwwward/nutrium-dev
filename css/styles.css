@@ -247,6 +247,11 @@ body:has(.mouse-follower-card:hover) .mouse-follower {
     height: auto; /* flex stretch fills the slide without needing a % chain */
 }
 
+/* Animated (marquee) swipers: constant speed, no easing between steps */
+.swiper.animated-row .swiper-wrapper {
+    transition-timing-function: linear !important;
+}
+
 .swiper .swiper-pagination {
     bottom: -2.5rem !important;
     display: flex;
